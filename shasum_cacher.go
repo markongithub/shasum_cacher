@@ -5,11 +5,19 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"github.com/garyburd/redigo/redis"
 	"log"
 	"net/http"
 	"strings"
+)
+
+var (
+	httpsServerAddress = flag.String("https_server_address", "localhost:5000", "Address on which to serve HTTPS requests")
+	redisServerAddress = flag.String("redis_server_address", "localhost:6379", "Redis server where message digests are cached")
+	serverSSLKey       = flag.String("server_ssl_key", "localhost.key", "private key for HTTPS server")
+	serverSSLCert      = flag.String("server_ssl_cert", "localhost.crt", "signed certificate for HTTPS server")
 )
 
 type HashRequest struct {
@@ -27,7 +35,7 @@ func poolRedisConnections() *redis.Pool {
 		MaxActive: 50,
 		MaxIdle:   10,
 		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", ":6379")
+			return redis.Dial("tcp", *redisServerAddress)
 		},
 	}
 }
@@ -110,10 +118,11 @@ func MessageHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	flag.Parse()
 
 	http.HandleFunc("/messages", MessageHandler)
 	http.HandleFunc("/messages/", MessageHandler)
-	err := http.ListenAndServeTLS(":6443", "localhost.crt", "localhost.key", nil)
+	err := http.ListenAndServeTLS(*httpsServerAddress, *serverSSLCert, *serverSSLKey, nil)
 	if err != nil {
 		log.Fatal("Failed to open HTTPS listener: ", err)
 	}
