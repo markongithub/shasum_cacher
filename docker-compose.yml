@@ -1,0 +1,22 @@
+version: "2"
+
+services:
+  app:
+    image: golang:1.6.1-alpine
+    log_opt:
+      max-size: "10m"
+    volumes:
+      - .:/go
+    working_dir: /go
+    command: go run shasum_cacher.go
+    ports:
+      - "127.0.0.1:5000:5000"
+    depends_on:
+      - redis
+    restart: always
+
+  redis:
+    image: redis
+    expose:
+      - "6379"
+

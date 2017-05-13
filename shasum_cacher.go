@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	httpsServerAddress = flag.String("https_server_address", "localhost:5000", "Address on which to serve HTTPS requests")
-	redisServerAddress = flag.String("redis_server_address", "localhost:6379", "Redis server where message digests are cached")
+	httpsServerAddress = flag.String("https_server_address", ":5000", "Address on which to serve HTTPS requests")
+	redisServerAddress = flag.String("redis_server_address", "redis:6379", "Redis server where message digests are cached")
 	serverSSLKey       = flag.String("server_ssl_key", "localhost.key", "private key for HTTPS server")
 	serverSSLCert      = flag.String("server_ssl_cert", "localhost.crt", "signed certificate for HTTPS server")
 )
@@ -108,8 +108,8 @@ func GetHandler(w http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func MessageHandler(w http.ResponseWriter, req *http.Request) {
-	log.Printf("Request method: %s", req.Method)
+func LoggingHandler(w http.ResponseWriter, req *http.Request) {
+	log.Printf("%s %s %s", req.RemoteAddr, req.Method, req.URL)
 	if req.Method == "POST" {
 		PostHandler(w, req)
 	} else {
@@ -120,8 +120,9 @@ func MessageHandler(w http.ResponseWriter, req *http.Request) {
 func main() {
 	flag.Parse()
 
-	http.HandleFunc("/messages", MessageHandler)
-	http.HandleFunc("/messages/", MessageHandler)
+	http.HandleFunc("/messages", LoggingHandler)
+	http.HandleFunc("/messages/", LoggingHandler)
+        log.Printf("About to listen on port %v", *httpsServerAddress)
 	err := http.ListenAndServeTLS(*httpsServerAddress, *serverSSLCert, *serverSSLKey, nil)
 	if err != nil {
 		log.Fatal("Failed to open HTTPS listener: ", err)
