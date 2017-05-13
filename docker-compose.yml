@@ -3,8 +3,6 @@ version: "2"
 services:
   app:
     image: golang:1.6.1-alpine
-    log_opt:
-      max-size: "10m"
     volumes:
       - .:/go
     working_dir: /go
