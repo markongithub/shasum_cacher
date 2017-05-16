@@ -16,4 +16,11 @@ By default it will listen on port 5000, but that is a command line flag that
 can be modified by editing the "command" line in `docker-compose.yml`. Were the
 caching HTTPS server to crash for any reason, Docker would restart it.
 
-Enjoy!
+Future work:
+* Move the datastore and frontend into separate Dockerfiles, so one can be
+scaled up independently of the other.
+
+* Offsite backups of the datastore.
+
+* Sharding of the datastore so that multiple instances of the datastore can
+run independently.
