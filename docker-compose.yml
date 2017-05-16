@@ -2,10 +2,7 @@ version: "2"
 
 services:
   app:
-    image: golang:1.6.1-alpine
-    volumes:
-      - .:/go
-    working_dir: /go
+    build: .
     command: go run shasum_cacher.go
     ports:
       - "127.0.0.1:5000:5000"
